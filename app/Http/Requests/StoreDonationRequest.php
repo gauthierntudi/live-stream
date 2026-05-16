@@ -14,11 +14,9 @@ class StoreDonationRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        if ($this->has('currency')) {
-            $this->merge([
-                'currency' => strtoupper((string) $this->input('currency')),
-            ]);
-        }
+        $this->merge([
+            'currency' => strtoupper((string) ($this->input('currency') ?: 'USD')),
+        ]);
 
         $email = trim((string) $this->input('donor_email', ''));
         if ($email === '' && $this->input('payment_method') !== 'card') {
@@ -48,7 +46,7 @@ class StoreDonationRequest extends FormRequest
             ),
             'donor_phone' => ['required', 'string', 'max:32'],
             'amount' => ['required', 'numeric', 'min:1', 'max:999999.99'],
-            'currency' => ['required', 'string', 'size:3', Rule::in(['USD', 'CDF'])],
+            'currency' => ['required', 'string', 'size:3', Rule::in(['USD'])],
             'payment_method' => ['required', 'string', Rule::in($allowedMethods)],
             'message' => ['nullable', 'string', 'max:2000'],
         ];

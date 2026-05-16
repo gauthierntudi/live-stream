@@ -494,8 +494,8 @@ class MaxiCashService
             $errors[] = 'Référence manquante';
         }
         $currency = (string) ($paymentData['currency'] ?? '');
-        if ($currency === '' || ! in_array($currency, ['USD', 'CDF'], true)) {
-            $errors[] = 'Devise invalide (USD ou CDF uniquement).';
+        if ($currency === '' || $currency !== 'USD') {
+            $errors[] = 'Devise invalide (USD uniquement).';
         }
         $phone = $this->formatPhoneNumber((string) ($paymentData['phone'] ?? ''));
         if (strlen($phone) !== 12 || ! preg_match('/^243[0-9]{9}$/', $phone)) {

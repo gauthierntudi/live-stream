@@ -27,8 +27,11 @@
 
 /* Barre du bas : dégradé façon SVOD */
 .live-player-netflix .video-js .vjs-control-bar {
+    position: relative;
+    z-index: 8;
     height: 4.25rem;
     padding-top: 0.45rem;
+    padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
     background: linear-gradient(
         180deg,
         transparent 0%,
@@ -47,6 +50,30 @@
 .live-player-netflix .video-js:not(.vjs-playing) .vjs-control-bar {
     opacity: 1;
     pointer-events: auto;
+}
+
+/*
+ * Tactile : pas de survol — si la barre disparaît elle semble « cassée ».
+ * On la garde lisible ; tap sur la vidéo pour play/pause reste géré par Video.js.
+ */
+@media (hover: none) and (pointer: coarse) {
+    .live-player-netflix .video-js.vjs-user-inactive.vjs-playing .vjs-control-bar {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .live-player-netflix .video-js .vjs-control-bar {
+        height: max(4.25rem, calc(3rem + env(safe-area-inset-bottom, 0px)));
+        font-size: 15px;
+    }
+
+    .live-player-netflix .video-js .vjs-big-play-button {
+        width: 4.75rem;
+        height: 4.75rem;
+        line-height: 4.75rem;
+        margin-top: -2.375rem;
+        margin-left: -2.375rem;
+    }
 }
 
 /* Progress / volume */

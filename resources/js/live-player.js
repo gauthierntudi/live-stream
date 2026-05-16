@@ -65,6 +65,10 @@ function attachLiveVideoJs(videoEl) {
 
     videoEl.dataset.liveVideojsDone = '1';
 
+    const coarseTouch =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
     const player = videojs(videoEl, {
         ...(ivsTechReady ? { techOrder: ['AmazonIVS', 'html5'] } : {}),
         controls: true,
@@ -75,6 +79,8 @@ function attachLiveVideoJs(videoEl) {
         fill: true,
         language: 'fr',
         liveui: true,
+        /* Mobile : délai plus long avant « user inactive » (barre qui semble absente). */
+        inactivityTimeout: coarseTouch ? 20000 : 4000,
         /**
          * Fenêtre seekable IVs souvent courte — seuil bas pour afficher la barre live UI.
          */

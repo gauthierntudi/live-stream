@@ -131,19 +131,35 @@
         border: 0;
         background: #000;
     }
+    /* Portrait / mobile : voir l’image entière (bandes noires) plutôt que recadrage type « cover » */
+    @media (max-width: 896px), (max-height: 520px) {
+        .live-page .player .live-player-netflix .video-js video {
+            object-fit: contain;
+            min-width: 0;
+            min-height: 0;
+        }
+    }
+    /*
+     * Iframe (Cloudflare / YouTube) : cadrage 16:9 « contain » dans la fenêtre (évite le zoom excessif en portrait).
+     */
     .live-page .player iframe {
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 100vw;
-        height: 56.25vw;
-        min-width: 177.78vh;
-        min-height: 100vh;
-        min-height: 100dvh;
-        min-height: 100lvh;
         transform: translate(-50%, -50%);
+        width: min(100vw, calc(100vh * 16 / 9));
+        height: min(100vh, calc(100vw * 9 / 16));
+        max-width: 100vw;
+        max-height: 100vh;
         border: 0;
         background: #000;
+    }
+    @supports (height: 100dvh) {
+        .live-page .player iframe {
+            width: min(100vw, calc(100dvh * 16 / 9));
+            height: min(100dvh, calc(100vw * 9 / 16));
+            max-height: 100dvh;
+        }
     }
     .player__overlay {
         position: absolute;

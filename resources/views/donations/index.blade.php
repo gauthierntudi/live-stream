@@ -185,8 +185,6 @@
         box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.15);
     }
     textarea { min-height: 100px; resize: vertical; }
-    .grid2 { display: grid; grid-template-columns: 1fr 7.5rem; gap: 0.65rem; align-items: stretch; }
-    @media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
     .err {
         color: #fca5a5;
         font-size: 0.85rem;
@@ -486,15 +484,9 @@
                         @endforeach
                     </div>
                     <div class="field">
-                        <label for="amount">Montant</label>
-                        <div class="grid2">
-                            <input id="amount" name="amount" type="number" step="0.01" min="1" value="{{ old('amount', '100') }}" placeholder="100" required inputmode="decimal" autocomplete="off">
-                            <select name="currency" id="currency" aria-label="Devise" autocomplete="off">
-                                @foreach (['USD', 'CDF'] as $c)
-                                    <option value="{{ $c }}" @selected(old('currency', 'USD') === $c)>{{ $c }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <label for="amount">Montant (USD)</label>
+                        <input type="hidden" name="currency" value="USD">
+                        <input id="amount" name="amount" type="number" step="0.01" min="1" value="{{ old('amount', '100') }}" placeholder="100" required inputmode="decimal" autocomplete="off">
                         @error('amount')<div class="err">{{ $message }}</div>@enderror
                         @error('currency')<div class="err">{{ $message }}</div>@enderror
                     </div>
