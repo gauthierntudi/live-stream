@@ -176,14 +176,16 @@ class CloudflareStreamService implements StreamingServiceInterface
     {
         $input = $this->getLiveInput($uid);
         if ($input === null) {
+            $resolvedUid = $uid ?? $this->resolveLiveInputUid();
+
             return [
                 'rtmps_url' => null,
                 'stream_key' => null,
                 'srt_url' => null,
-                'playback' => $this->playbackIframeFromLiveInput($input) ?? $this->iframeSrc(),
+                'playback' => $this->iframeSrc(),
                 'enabled' => null,
                 'status' => null,
-                'uid' => $uid,
+                'uid' => $resolvedUid,
             ];
         }
 

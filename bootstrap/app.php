@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        /* Reverse proxy (ex. Laravel Cloud) : HTTPS et URL corrects pour sessions / CSRF. */
+        $middleware->trustProxies(at: '*');
+
         $middleware->redirectGuestsTo(fn () => route('admin.login'));
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
