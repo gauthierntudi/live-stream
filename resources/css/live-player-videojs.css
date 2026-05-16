@@ -1,0 +1,106 @@
+/**
+ * Thème live IVS (Video.js) — style cinéma / Netflix, couleurs alignées sur la charte stream (:root --accent).
+ */
+
+/*
+ * Video.js masque la barre sur les layouts « x-small / tiny » — rétablie dans notre lecteur.
+ */
+.live-player-netflix .video-js.vjs-layout-x-small .vjs-progress-control,
+.live-player-netflix .video-js.vjs-layout-tiny .vjs-progress-control {
+    display: flex;
+    align-items: center;
+    min-width: 3em;
+}
+
+.live-player-netflix {
+    --vjs-brand: var(--accent, #e50914);
+    --vjs-brand-soft: rgba(229, 9, 20, 0.35);
+    --vjs-text: #f3f4f6;
+    --vjs-bar-bg: rgba(0, 0, 0, 0.88);
+}
+
+.live-player-netflix .video-js {
+    font-family: var(--font-stream-body, 'Montserrat', system-ui, sans-serif);
+    font-size: 14px;
+    color: var(--vjs-text);
+}
+
+/* Barre du bas : dégradé façon SVOD */
+.live-player-netflix .video-js .vjs-control-bar {
+    height: 4.25rem;
+    padding-top: 0.45rem;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.45) 35%,
+        rgba(0, 0, 0, 0.92) 100%
+    );
+    transition: opacity 0.22s ease;
+}
+
+.live-player-netflix .video-js.vjs-user-inactive.vjs-playing .vjs-control-bar {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.live-player-netflix .video-js.vjs-user-active .vjs-control-bar,
+.live-player-netflix .video-js:not(.vjs-playing) .vjs-control-bar {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Progress / volume */
+.live-player-netflix .video-js .vjs-play-progress,
+.live-player-netflix .video-js .vjs-volume-level {
+    background-color: var(--vjs-brand);
+}
+
+.live-player-netflix .video-js .vjs-load-progress div {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.live-player-netflix .video-js .vjs-progress-control .vjs-progress-holder {
+    height: 0.32rem;
+    border-radius: 2px;
+}
+
+.live-player-netflix .video-js .vjs-slider {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Bouton lecture central */
+.live-player-netflix .video-js .vjs-big-play-button {
+    width: 4.25rem;
+    height: 4.25rem;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(229, 9, 20, 0.92);
+    line-height: 4.25rem;
+    margin-top: -2.125rem;
+    margin-left: -2.125rem;
+    font-size: 2rem;
+}
+
+.live-player-netflix .video-js .vjs-big-play-button:hover,
+.live-player-netflix .video-js .vjs-big-play-button:focus {
+    background-color: var(--vjs-brand);
+}
+
+/* Indicateur LIVE */
+.live-player-netflix .video-js .vjs-live-control .vjs-live-display {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+    color: var(--vjs-brand);
+}
+
+.live-player-netflix .video-js .vjs-control:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.65);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .live-player-netflix .video-js .vjs-control-bar {
+        transition: none;
+    }
+}
