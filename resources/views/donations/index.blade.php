@@ -195,18 +195,22 @@
     }
     .method-grid-wrap {
         margin-top: 8px;
-        overflow-x: auto;
-        overflow-y: visible;
-        margin-inline: -0.35rem;
-        padding-inline: 0.35rem;
+        overflow: visible;
+        margin-inline: 0;
+        padding-inline: 0;
         padding-bottom: 0.35rem;
-        -webkit-overflow-scrolling: touch;
     }
     .method-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 0.5rem;
-        min-width: 17.5rem;
+        --method-icon-img: 50px;
+        --method-icon-size: calc(50px + 0.56rem + 4px);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: center;
+        gap: clamp(0.35rem, 2vw, 0.55rem);
+        width: 100%;
+        min-width: 0;
     }
     .method-card {
         position: relative;
@@ -214,9 +218,13 @@
         display: grid;
         grid-template-columns: 1fr;
         grid-template-rows: 1fr;
-        width: 90%;
-        justify-self: center;
-        aspect-ratio: 1 / 1;
+        flex: 0 0 var(--method-icon-size);
+        width: var(--method-icon-size);
+        height: var(--method-icon-size);
+        min-width: var(--method-icon-size);
+        min-height: var(--method-icon-size);
+        max-width: var(--method-icon-size);
+        max-height: var(--method-icon-size);
         margin-top: 10px;
         padding: 0.28rem;
         border-radius: 23px;
@@ -224,13 +232,23 @@
         background: rgba(0, 0, 0, 0.28);
         cursor: pointer;
         transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
-        min-width: 0;
+        font: inherit;
+        color: inherit;
+        -webkit-tap-highlight-color: transparent;
+    }
+    button.method-card {
+        appearance: none;
+        margin-inline: 0;
     }
     .method-card:hover {
         border-color: rgba(255, 255, 255, 0.22);
         background: rgba(255, 255, 255, 0.05);
     }
     .method-card:has(input:checked) {
+        border-color: rgba(229, 9, 20, 0.8);
+        background: rgba(229, 9, 20, 0.14);
+    }
+    .method-card--external.is-active {
         border-color: rgba(229, 9, 20, 0.8);
         background: rgba(229, 9, 20, 0.14);
     }
@@ -254,17 +272,82 @@
     .method-card__img {
         grid-row: 1;
         grid-column: 1;
-        width: 100%;
-        height: 100%;
-        min-width: 0;
-        min-height: 0;
+        place-self: center;
+        width: var(--method-icon-img);
+        height: var(--method-icon-img);
+        max-width: var(--method-icon-img);
+        max-height: var(--method-icon-img);
         object-fit: contain;
         object-position: center;
         border-radius: 20px;
         pointer-events: none;
     }
+    @media (min-width: 640px) {
+        .method-grid {
+            --method-icon-img: 70px;
+            --method-icon-size: calc(70px + 0.56rem + 4px);
+        }
+    }
     @media (min-width: 420px) {
         .method-card { padding: 0.32rem; }
+    }
+    /* Modal PayPal */
+    .paypal-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+        padding: max(1.25rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right))
+            max(1.25rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+    }
+    .paypal-modal[hidden] {
+        display: none !important;
+    }
+    .paypal-modal__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.72);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
+    .paypal-modal__panel {
+        position: relative;
+        z-index: 1;
+        width: min(100%, 22rem);
+        padding: 1.5rem 1.35rem 1.35rem;
+        border-radius: 1rem;
+        background: linear-gradient(165deg, #1f2937 0%, #14141f 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.45);
+    }
+    .paypal-modal__panel h2 {
+        margin: 0 0 0.65rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #f3f4f6;
+    }
+    .paypal-modal__panel p {
+        margin: 0 0 1.35rem;
+        font-size: 0.9rem;
+        line-height: 1.55;
+        color: #9ca3af;
+    }
+    .paypal-modal__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+    }
+    .paypal-modal__actions .btn {
+        flex: 1 1 auto;
+        min-width: 7rem;
+        justify-content: center;
+        text-align: center;
+    }
+    .paypal-modal__actions a.btn {
+        text-decoration: none;
     }
     .soutenir-form-global-err {
         margin-bottom: 1rem;
@@ -443,7 +526,10 @@
                 </p>
             @else
                 @php
-                    $defaultPayment = $paymentMethods[0]['id'];
+                    $paypalMeUrl = (string) config('payment_methods.paypal_me_url');
+                    $defaultPayment = collect($paymentMethods)
+                        ->first(fn (array $m) => empty($m['external']))['id']
+                        ?? ($paymentMethods[0]['id'] ?? 'card');
                 @endphp
                 <form method="post" action="{{ route('donations.store') }}" id="soutenir-form" autocomplete="off">
                     @csrf
@@ -451,26 +537,44 @@
 
                     <div class="soutenir-section">
                         <div class="method-grid-wrap">
-                        <div class="method-grid" role="radiogroup" aria-label="Moyen de paiement">
+                        <div class="method-grid" role="group" aria-label="Moyen de paiement">
                             @foreach ($paymentMethods as $method)
-                                <label class="method-card" aria-label="{{ $method['label'] }}">
-                                    <input
-                                        class="method-card__input"
-                                        type="radio"
-                                        name="payment_method"
-                                        value="{{ $method['id'] }}"
-                                        @checked(old('payment_method', $defaultPayment) === $method['id'])
-                                        required
+                                @if (! empty($method['external']))
+                                    <button
+                                        type="button"
+                                        class="method-card method-card--external"
+                                        data-paypal-modal-open
+                                        aria-label="{{ $method['label'] }}"
                                     >
-                                    <img
-                                        class="method-card__img"
-                                        src="{{ asset('img/icons/'.$method['icon']) }}"
-                                        alt="{{ $method['label'] }}"
-                                        loading="lazy"
-                                        width="120"
-                                        height="60"
-                                    >
-                                </label>
+                                        <img
+                                            class="method-card__img"
+                                            src="{{ asset('img/icons/'.$method['icon']) }}"
+                                            alt=""
+                                            loading="lazy"
+                                            width="50"
+                                            height="50"
+                                        >
+                                    </button>
+                                @else
+                                    <label class="method-card" aria-label="{{ $method['label'] }}">
+                                        <input
+                                            class="method-card__input"
+                                            type="radio"
+                                            name="payment_method"
+                                            value="{{ $method['id'] }}"
+                                            @checked(old('payment_method', $defaultPayment) === $method['id'])
+                                            required
+                                        >
+                                        <img
+                                            class="method-card__img"
+                                            src="{{ asset('img/icons/'.$method['icon']) }}"
+                                            alt=""
+                                            loading="lazy"
+                                            width="50"
+                                            height="50"
+                                        >
+                                    </label>
+                                @endif
                             @endforeach
                         </div>
                         </div>
@@ -479,7 +583,7 @@
 
                 <div class="soutenir-section">
                     <div class="amount-chips" id="amount-chips" role="group" aria-label="Montants rapides">
-                        @foreach ([50, 100, 250, 500, 1000, 2500] as $chip)
+                        @foreach ([50, 100, 250, 500, 1000] as $chip)
                             <button type="button" class="amount-chip" data-amount="{{ $chip }}">{{ number_format($chip, 0, ',', ' ') }}</button>
                         @endforeach
                     </div>
@@ -521,6 +625,28 @@
                     <i data-lucide="banknote" aria-hidden="true"></i> Soutenir
                 </button>
             </form>
+
+            <div
+                id="paypal-modal"
+            class="paypal-modal"
+            hidden
+            aria-hidden="true"
+        >
+            <button type="button" class="paypal-modal__backdrop" data-paypal-modal-close aria-label="Fermer"></button>
+            <div class="paypal-modal__panel" role="dialog" aria-modal="true" aria-labelledby="paypal-modal-title">
+                <h2 id="paypal-modal-title">Paiement via PayPal</h2>
+                <p>Vous allez être redirigé vers PayPal pour terminer votre soutien en toute sécurité.</p>
+                <div class="paypal-modal__actions">
+                    <button type="button" class="btn btn-secondary" data-paypal-modal-close>Fermer</button>
+                    <a
+                        class="btn btn-gold"
+                        href="{{ $paypalMeUrl ?? config('payment_methods.paypal_me_url') }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >Continuer</a>
+                </div>
+            </div>
+            </div>
             @endif
         </div>
 
@@ -544,6 +670,47 @@
 @vite(['resources/js/page-loader.js'])
 <script>
 (function () {
+    var paypalModal = document.getElementById('paypal-modal');
+    var paypalOpeners = document.querySelectorAll('[data-paypal-modal-open]');
+    var paypalLastFocus = null;
+
+    function openPaypalModal() {
+        if (!paypalModal) return;
+        paypalLastFocus = document.activeElement;
+        paypalModal.hidden = false;
+        paypalModal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        var closeBtn = paypalModal.querySelector('[data-paypal-modal-close]');
+        if (closeBtn && typeof closeBtn.focus === 'function') {
+            closeBtn.focus();
+        }
+    }
+
+    function closePaypalModal() {
+        if (!paypalModal) return;
+        paypalModal.hidden = true;
+        paypalModal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (paypalLastFocus && typeof paypalLastFocus.focus === 'function') {
+            paypalLastFocus.focus();
+        }
+    }
+
+    paypalOpeners.forEach(function (btn) {
+        btn.addEventListener('click', openPaypalModal);
+    });
+
+    if (paypalModal) {
+        paypalModal.querySelectorAll('[data-paypal-modal-close]').forEach(function (el) {
+            el.addEventListener('click', closePaypalModal);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && paypalModal && !paypalModal.hidden) {
+                closePaypalModal();
+            }
+        });
+    }
+
     var form = document.getElementById('soutenir-form');
     if (!form) return;
 

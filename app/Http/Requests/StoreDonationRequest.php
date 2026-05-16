@@ -31,6 +31,7 @@ class StoreDonationRequest extends FormRequest
     public function rules(): array
     {
         $allowedMethods = collect(config('payment_methods.methods', []))
+            ->reject(fn (array $m) => ! empty($m['external']))
             ->pluck('id')
             ->filter()
             ->values()
