@@ -31,14 +31,7 @@ class LiveController extends Controller
 
     public function previewStatus(): JsonResponse
     {
-        $data = $this->presenter->viewData(requirePublicVisibility: false);
-
-        return response()->json([
-            'live' => $data['streamLive'],
-            'hasPlayerConfig' => $data['hasPlayerConfig'],
-            'playbackMode' => $data['playbackMode'],
-            'html' => view('live.partials.player-inner', $data)->render(),
-        ]);
+        return response()->json($this->presenter->statusJsonPayload(requirePublicVisibility: false));
     }
 
     public function publish(Request $request): RedirectResponse|JsonResponse

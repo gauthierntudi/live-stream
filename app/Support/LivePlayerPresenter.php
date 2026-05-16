@@ -12,6 +12,60 @@ final class LivePlayerPresenter
     ) {}
 
     /**
+     * Arrière-plan « écran d’attente » (même logique que la vue live).
+     */
+    public function waitingBackgroundUrl(): ?string
+    {
+        $bgConfig = config('app.donation_success_background');
+        if (is_string($bgConfig) && trim($bgConfig) !== '') {
+            $t = trim($bgConfig);
+
+            return str_starts_with($t, 'http://') || str_starts_with($t, 'https://')
+                ? $t
+                : asset(ltrim($t, '/'));
+        }
+
+        foreach (['webp', 'jpg', 'jpeg', 'png'] as $ext) {
+            if (is_file(public_path('img/success-bg.'.$ext))) {
+                return asset('img/success-bg.'.$ext);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Payload JSON pour `/live/status` et la prévisualisation admin (polling sans recharger).
+     *
+     * @return array{
+     *     live: bool,
+     *     hasPlayerConfig: bool,
+     *     playbackMode: string,
+     *     html: ?string,
+     *     playerStateHash: string,
+     *     showWaiting: bool,
+     *     waitingBgUrl: ?string,
+     * }
+     */
+    public function statusJsonPayload(bool $requirePublicVisibility): array
+    {
+        $data = $this->viewData($requirePublicVisibility);
+        $html = ($data['hasPlayerConfig'] ?? false)
+            ? view('live.partials.player-inner', $data)->render()
+            : null;
+
+        return [
+            'live' => $data['streamLive'],
+            'hasPlayerConfig' => $data['hasPlayerConfig'],
+            'playbackMode' => $data['playbackMode'],
+            'html' => $html,
+            'playerStateHash' => is_string($html) && $html !== '' ? hash('xxh128', $html) : '',
+            'showWaiting' => $data['showWaiting'],
+            'waitingBgUrl' => $data['waitingBgUrl'],
+        ];
+    }
+
+    /**
      * @return array{
      *     iframeSrc: ?string,
      *     playbackUrl: ?string,
@@ -25,6 +79,7 @@ final class LivePlayerPresenter
      *     broadcasting: bool,
      *     publicLiveVisible: bool,
      *     waitingNotYetPublic: bool,
+     *     waitingBgUrl: ?string,
      * }
      */
     public function viewData(bool $requirePublicVisibility): array
@@ -71,6 +126,7 @@ final class LivePlayerPresenter
             'broadcasting' => $broadcasting,
             'publicLiveVisible' => $publicVisible,
             'waitingNotYetPublic' => $waitingNotYetPublic,
+            'waitingBgUrl' => $this->waitingBackgroundUrl(),
         ];
     }
 }

@@ -32,29 +32,52 @@ async function initHlsIfNeeded(playbackMode, scope) {
     initLivePlayer(scope);
 }
 
-/**
- * Met à jour le contenu du lecteur à partir de la réponse JSON /live/status ou preview-status.
- *
- * @returns {Promise<boolean>} true si le flux est en lecture (arrêt du polling)
- */
-export async function applyLiveStatusPayload(player, data) {
-    if (data.html) {
-        const { disposeLivePlayersIn } = await import('./live-player.js');
-        disposeLivePlayersIn(player);
-        player.innerHTML = data.html;
-    }
+function syncPlayerWaitBackdrop(player, data) {
+    const url = data.waitingBgUrl;
 
     if (data.live) {
         player.classList.remove('player--has-wait-bg');
         player.removeAttribute('style');
-        player.removeAttribute('data-live-poll');
-        player.removeAttribute('data-live-poll-armed');
-        await initHlsIfNeeded(data.playbackMode, player);
 
-        return true;
+        return;
     }
 
-    return false;
+    if (data.showWaiting && typeof url === 'string' && url !== '') {
+        player.classList.add('player--has-wait-bg');
+        player.style.setProperty('--live-wait-bg', `url(${JSON.stringify(url)})`);
+
+        return;
+    }
+
+    player.classList.remove('player--has-wait-bg');
+    player.removeAttribute('style');
+}
+
+/**
+ * Met à jour le lecteur à partir de la réponse JSON /live/status ou preview-status.
+ * Évite de réinjecter le même HTML en boucle (hash) pour ne pas couper la vidéo IVS / iframe.
+ *
+ * @returns {Promise<boolean>} état « flux jouable » (streamLive côté serveur)
+ */
+export async function applyLiveStatusPayload(player, data) {
+    const incomingHash = typeof data.playerStateHash === 'string' ? data.playerStateHash : '';
+    const currentHash = player.dataset.liveContentHash ?? '';
+    const unchanged = incomingHash !== '' && incomingHash === currentHash;
+
+    if (!unchanged && typeof data.html === 'string' && data.html !== '') {
+        const { disposeLivePlayersIn } = await import('./live-player.js');
+        disposeLivePlayersIn(player);
+        player.innerHTML = data.html;
+        player.dataset.liveContentHash = incomingHash;
+    }
+
+    syncPlayerWaitBackdrop(player, data);
+
+    if (data.live) {
+        await initHlsIfNeeded(data.playbackMode, player);
+    }
+
+    return Boolean(data.live);
 }
 
 function schedulePoll(player, statusUrl, intervalMs) {
@@ -68,10 +91,7 @@ async function pollLiveStatus(player, statusUrl, intervalMs) {
 
     try {
         const data = await fetchLiveStatus(statusUrl);
-        const isLive = await applyLiveStatusPayload(player, data);
-        if (isLive) {
-            return;
-        }
+        await applyLiveStatusPayload(player, data);
     } catch {
         /* réessaie au prochain cycle */
     }

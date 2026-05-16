@@ -1,23 +1,5 @@
 @extends('layouts.stream')
 
-@php
-    $waitBgUrl = null;
-    $bgConfig = config('app.donation_success_background');
-    if (is_string($bgConfig) && trim($bgConfig) !== '') {
-        $t = trim($bgConfig);
-        $waitBgUrl = str_starts_with($t, 'http://') || str_starts_with($t, 'https://')
-            ? $t
-            : asset(ltrim($t, '/'));
-    } else {
-        foreach (['webp', 'jpg', 'jpeg', 'png'] as $ext) {
-            if (is_file(public_path('img/success-bg.'.$ext))) {
-                $waitBgUrl = asset('img/success-bg.'.$ext);
-                break;
-            }
-        }
-    }
-@endphp
-
 @section('title', 'Live — '.config('app.name'))
 
 @section('nav_actions')
@@ -226,7 +208,7 @@
 
 @section('content')
     @php
-        $playerWaitBg = $waitBgUrl && ($showWaiting ?? false);
+        $playerWaitBg = ! empty($waitingBgUrl) && ($showWaiting ?? false);
     @endphp
 
     <div class="live-page">
@@ -234,12 +216,13 @@
         <div
             class="player{{ $playerWaitBg ? ' player--has-wait-bg' : '' }}"
             @if ($playerWaitBg)
-                style="--live-wait-bg: url({{ json_encode($waitBgUrl) }})"
+                style="--live-wait-bg: url({{ json_encode($waitingBgUrl) }})"
             @endif
-            @if ($showWaiting)
+            @if ($hasPlayerConfig ?? false)
                 data-live-poll
                 data-live-status-url="{{ route('live.status') }}"
                 data-live-poll-interval="8000"
+                data-live-content-hash="{{ $initialPlayerInnerHash }}"
             @endif
         >
             @include('live.partials.player-inner')
@@ -254,7 +237,7 @@
     @endpush
 @endif
 
-@if ($showWaiting ?? false)
+@if ($hasPlayerConfig ?? false)
     @push('scripts')
         @vite('resources/js/live-status-poll-boot.js')
     @endpush

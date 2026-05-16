@@ -14,20 +14,20 @@ class LiveController extends Controller
 
     public function show(): View
     {
-        return view('live.show', $this->presenter->viewData(requirePublicVisibility: true));
+        $data = $this->presenter->viewData(requirePublicVisibility: true);
+        $initialHash = '';
+        if ($data['hasPlayerConfig'] ?? false) {
+            $inner = view('live.partials.player-inner', $data)->render();
+            $initialHash = hash('xxh128', $inner);
+        }
+
+        return view('live.show', array_merge($data, [
+            'initialPlayerInnerHash' => $initialHash,
+        ]));
     }
 
     public function status(): JsonResponse
     {
-        $data = $this->presenter->viewData(requirePublicVisibility: true);
-
-        return response()->json([
-            'live' => $data['streamLive'],
-            'hasPlayerConfig' => $data['hasPlayerConfig'],
-            'playbackMode' => $data['playbackMode'],
-            'html' => ($data['hasPlayerConfig'] ?? false)
-                ? view('live.partials.player-inner', $data)->render()
-                : null,
-        ]);
+        return response()->json($this->presenter->statusJsonPayload(requirePublicVisibility: true));
     }
 }
