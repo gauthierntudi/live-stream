@@ -64,7 +64,7 @@ function startKenBurns(slide, durationMs) {
 }
 
 /**
- * Diaporama hero : 3 images → vidéo → grille masonry (défilement vertical), en boucle.
+ * Diaporama hero : images → vidéo → grille masonry (défilement vertical), en boucle.
  */
 function mountHeroCarousel(root) {
     const slides = Array.from(root.querySelectorAll('.hero__slide'));
@@ -73,7 +73,10 @@ function mountHeroCarousel(root) {
     }
 
     const imageMs = Number(root.dataset.interval) || 5800;
-    const youtubeMs = Number(root.dataset.youtubeInterval) || 12000;
+    const videoMs =
+        Number(root.dataset.videoInterval) ||
+        Number(root.dataset.youtubeInterval) ||
+        12000;
     const masonryMs = Number(root.dataset.masonryInterval) || 14000;
     const reduced = prefersReducedMotion();
     let current = 0;
@@ -83,8 +86,8 @@ function mountHeroCarousel(root) {
     const slideDuration = (slide) => {
         const type = slide.dataset.slideType;
 
-        if (type === 'youtube') {
-            return youtubeMs;
+        if (type === 'video') {
+            return videoMs;
         }
 
         if (type === 'masonry') {
@@ -105,54 +108,52 @@ function mountHeroCarousel(root) {
         zIndex: 1,
     });
 
-    const youtubeHost = (slide) => slide.querySelector('.hero__slide-video');
+    const videoHost = (slide) => slide.querySelector('.hero__slide-video');
 
-    const injectYoutube = (slide) => {
-        const host = youtubeHost(slide);
-        if (!host || host.querySelector('iframe')) {
+    const injectHeroVideo = (slide) => {
+        const host = videoHost(slide);
+        if (!host || host.querySelector('video')) {
             return;
         }
-        const id = slide.dataset.youtubeId;
-        if (!id) {
+        const src = slide.dataset.videoSrc;
+        if (!src) {
             return;
         }
-        const start = Number(slide.dataset.youtubeStart || 0);
-        const iframe = document.createElement('iframe');
-        iframe.className = 'hero__iframe';
-        iframe.setAttribute('title', 'YouTube');
-        iframe.setAttribute(
-            'allow',
-            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
-        );
-        const params = new URLSearchParams({
-            autoplay: '1',
-            mute: '1',
-            playsinline: '1',
-            rel: '0',
-            modestbranding: '1',
-            controls: '0',
-            fs: '0',
-            disablekb: '1',
-            iv_load_policy: '3',
-            start: String(start),
-        });
-        iframe.src = `https://www.youtube.com/embed/${id}?${params.toString()}`;
-        host.appendChild(iframe);
+        const video = document.createElement('video');
+        video.className = 'hero__video';
+        video.muted = true;
+        video.defaultMuted = true;
+        video.autoplay = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('preload', 'auto');
+        video.setAttribute('aria-hidden', 'true');
+        video.src = src;
+        host.appendChild(video);
+        video.play().catch(() => {});
     };
 
-    const teardownYoutube = (slide) => {
-        const host = youtubeHost(slide);
-        if (host) {
-            host.innerHTML = '';
+    const teardownHeroVideo = (slide) => {
+        const host = videoHost(slide);
+        if (!host) {
+            return;
         }
+        const video = host.querySelector('video');
+        if (video) {
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+        }
+        host.innerHTML = '';
     };
 
     const activateSlide = (slide) => {
         const type = slide.dataset.slideType;
         const duration = slideDuration(slide);
 
-        if (type === 'youtube') {
-            injectYoutube(slide);
+        if (type === 'video') {
+            injectHeroVideo(slide);
         } else if (type === 'masonry') {
             startMasonryScroll(slide, duration);
         } else {
@@ -163,8 +164,8 @@ function mountHeroCarousel(root) {
     const deactivateSlide = (slide) => {
         const type = slide.dataset.slideType;
 
-        if (type === 'youtube') {
-            teardownYoutube(slide);
+        if (type === 'video') {
+            teardownHeroVideo(slide);
         } else if (type === 'masonry') {
             killMasonryScroll(slide);
         } else {

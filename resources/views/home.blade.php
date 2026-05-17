@@ -112,18 +112,16 @@
         overflow: hidden;
         background: #000;
     }
-    /* 16:9 en « cover » sur toute la slide (comme object-fit: cover) */
-    .hero__iframe {
+    .hero__slide-video .hero__video {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 100vw;
-        height: 56.25vw;
-        min-width: 177.78vh;
-        min-height: 100vh;
-        transform: translate(-50%, -50%);
-        border: 0;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
         pointer-events: none;
+        background: #000;
     }
     .hero__slide[data-slide-type="masonry"] {
         background: #0b0b0f;
@@ -263,12 +261,12 @@
 
 @section('content')
     <section class="hero hero--full hero--gsap" data-hero-section>
-        @if (count($carouselImages) > 0 || ($youtube ?? null) || count($masonryImages) > 0)
+        @if (count($carouselImages) > 0 || ($heroVideo ?? null) || count($masonryImages) > 0)
             <div
                 class="hero__media hero__media--carousel"
                 data-hero-carousel
                 data-interval="5800"
-                data-youtube-interval="12000"
+                data-video-interval="12000"
                 data-masonry-interval="{{ $masonryDurationMs ?? 14000 }}"
                 aria-hidden="true"
             >
@@ -290,12 +288,11 @@
                     </div>
                 @endforeach
 
-                @if ($youtube ?? null)
+                @if ($heroVideo ?? null)
                     <div
                         class="hero__slide"
-                        data-slide-type="youtube"
-                        data-youtube-id="{{ $youtube['video_id'] }}"
-                        data-youtube-start="{{ $youtube['start'] }}"
+                        data-slide-type="video"
+                        data-video-src="{{ $heroVideo }}"
                     >
                         <div class="hero__slide-video"></div>
                     </div>

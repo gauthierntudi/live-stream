@@ -23,11 +23,15 @@ class HomeController extends Controller
                 28_000,
                 count($masonryFigureSequence) * 520,
             ),
-            'youtube' => [
-                'video_id' => 'NFGqAv2uNM4',
-                'start' => 30,
-            ],
+            'heroVideo' => $this->resolveHeroVideoUrl(),
         ]);
+    }
+
+    private function resolveHeroVideoUrl(): ?string
+    {
+        $url = config('app.home_hero_video_url');
+
+        return is_string($url) && trim($url) !== '' ? trim($url) : null;
     }
 
     /**
