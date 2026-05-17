@@ -51,6 +51,70 @@
             gap: 0.75rem;
             flex-wrap: wrap;
         }
+        .admin-top-actions form {
+            margin: 0;
+            display: flex;
+        }
+        .admin-top-actions .btn svg {
+            width: 1.15rem;
+            height: 1.15rem;
+            flex-shrink: 0;
+        }
+        @media (max-width: 640px) {
+            .admin-top {
+                flex-wrap: nowrap;
+                gap: 0.65rem;
+                padding: 0.75rem 4vw;
+            }
+            .admin-top-brand .brand {
+                font-size: clamp(1rem, 4vw, 1.25rem);
+            }
+            .admin-top-brand .brand-tagline {
+                font-size: 0.5rem;
+                letter-spacing: 0.12em;
+            }
+            .admin-top-actions {
+                flex-wrap: nowrap;
+                gap: 0.5rem;
+                flex-shrink: 0;
+            }
+            .admin-top-actions .admin-top-btn-label {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border-width: 0;
+            }
+            .admin-top-actions .btn {
+                position: relative;
+                width: 2.875rem;
+                height: 2.875rem;
+                min-height: 0;
+                padding: 0;
+                border-radius: 50%;
+                gap: 0;
+                font-size: 0;
+                line-height: 0;
+            }
+            .admin-top-actions .btn svg {
+                width: 1.35rem;
+                height: 1.35rem;
+            }
+        }
+        @media (max-width: 380px) {
+            .admin-top-actions .btn {
+                width: 2.6rem;
+                height: 2.6rem;
+            }
+            .admin-top-actions .btn svg {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+        }
         .admin-tabs {
             display: flex;
             gap: 0.35rem;
@@ -711,10 +775,22 @@
                 @include('partials.stream-brand')
             </a>
             <div class="admin-top-actions">
-                <a class="btn btn-secondary" href="{{ route('home') }}" target="_blank" rel="noopener">Voir le site</a>
+                <a
+                    class="btn btn-secondary"
+                    href="{{ route('home') }}"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="Voir le site"
+                >
+                    <i data-lucide="globe" aria-hidden="true"></i>
+                    <span class="admin-top-btn-label">Voir le site</span>
+                </a>
                 <form method="post" action="{{ route('admin.logout') }}">
                     @csrf
-                    <button type="submit" class="btn btn-secondary">Déconnexion</button>
+                    <button type="submit" class="btn btn-secondary" aria-label="Déconnexion">
+                        <i data-lucide="log-out" aria-hidden="true"></i>
+                        <span class="admin-top-btn-label">Déconnexion</span>
+                    </button>
                 </form>
             </div>
         </header>
