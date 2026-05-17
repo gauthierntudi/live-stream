@@ -99,12 +99,22 @@ final class LivePlayerPresenter
             || $this->stream->providerKey() === 'youtube';
         $broadcasting = $this->stream->isBroadcasting();
         $publicVisible = Setting::isLivePublicVisible();
-        $streamLive = $requirePublicVisibility
-            ? ($broadcasting && $publicVisible)
-            : $broadcasting;
         $playbackMode = $this->stream->playbackMode();
         $isHls = $playbackMode === 'hls';
-        $showPlayer = $hasPlaybackSurface && $streamLive;
+
+        /*
+         * Public : dès que l’admin a ouvert au public et qu’une URL de lecture existe, on garde le lecteur
+         * affiché (évite le « flash » puis disparition quand isBroadcasting() fluctue ou avant qu’OBS envoie).
+         * Admin / prévisualisation : le lecteur suit toujours l’état réel du signal.
+         */
+        if ($requirePublicVisibility) {
+            $showPlayer = $hasPlaybackSurface && $publicVisible;
+            $streamLive = $showPlayer;
+        } else {
+            $streamLive = $broadcasting;
+            $showPlayer = $hasPlaybackSurface && $streamLive;
+        }
+
         $showWaiting = $hasPlayerConfig && ! $showPlayer;
         $waitingNotYetPublic = $requirePublicVisibility
             && $broadcasting
