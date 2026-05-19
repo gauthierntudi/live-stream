@@ -12,6 +12,15 @@
     min-width: 3em;
 }
 
+/* Tech IVS / canvas au-dessous de la barre de contrôles */
+.live-player-netflix .video-js .vjs-tech {
+    z-index: 0;
+}
+
+.live-player-netflix .video-js .vjs-poster {
+    z-index: 1;
+}
+
 .live-player-netflix {
     --vjs-brand: var(--accent, #e50914);
     --vjs-brand-soft: rgba(229, 9, 20, 0.35);
@@ -34,7 +43,7 @@
     right: 0;
     top: auto;
     width: 100%;
-    z-index: 8;
+    z-index: 25;
     height: 4.25rem;
     padding-top: 0.45rem;
     padding-bottom: calc(0.35rem + env(safe-area-inset-bottom, 0px));
@@ -59,13 +68,20 @@
 }
 
 /*
- * Tactile : pas de survol — si la barre disparaît elle semble « cassée ».
- * On la garde lisible ; tap sur la vidéo pour play/pause reste géré par Video.js.
+ * Mobile / tactile : barre toujours visible (Video.js la masque sans vjs-has-started
+ * ou en user-inactive ; certains iPad ne matchent pas pointer: coarse seul).
  */
-@media (hover: none) and (pointer: coarse) {
+@media (max-width: 896px), (hover: none) and (pointer: coarse) {
+    .live-player-netflix .video-js:not(.vjs-error):not(.vjs-controls-disabled) .vjs-control-bar {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+
     .live-player-netflix .video-js.vjs-user-inactive.vjs-playing .vjs-control-bar {
-        opacity: 1;
-        pointer-events: auto;
+        opacity: 1 !important;
+        pointer-events: auto !important;
     }
 
     .live-player-netflix .video-js .vjs-control-bar {
@@ -79,6 +95,22 @@
         line-height: 4.75rem;
         margin-top: -2.375rem;
         margin-left: -2.375rem;
+        z-index: 24;
+    }
+
+    /* Layout x-small / tiny : réafficher les contrôles essentiels */
+    .live-player-netflix .video-js.vjs-layout-x-small .vjs-play-control,
+    .live-player-netflix .video-js.vjs-layout-tiny .vjs-play-control,
+    .live-player-netflix .video-js.vjs-layout-x-small .vjs-fullscreen-control,
+    .live-player-netflix .video-js.vjs-layout-tiny .vjs-fullscreen-control,
+    .live-player-netflix .video-js.vjs-layout-x-small .vjs-live-control,
+    .live-player-netflix .video-js.vjs-layout-tiny .vjs-live-control,
+    .live-player-netflix .video-js.vjs-layout-x-small .vjs-mute-control,
+    .live-player-netflix .video-js.vjs-layout-tiny .vjs-mute-control,
+    .live-player-netflix .video-js.vjs-layout-x-small .vjs-volume-panel,
+    .live-player-netflix .video-js.vjs-layout-tiny .vjs-volume-panel {
+        display: flex !important;
+        align-items: center;
     }
 }
 

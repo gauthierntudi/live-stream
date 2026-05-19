@@ -65,9 +65,10 @@ function attachLiveVideoJs(videoEl) {
 
     videoEl.dataset.liveVideojsDone = '1';
 
-    const coarseTouch =
+    const mobileLike =
         typeof window.matchMedia === 'function' &&
-        window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+        (window.matchMedia('(max-width: 896px)').matches ||
+            window.matchMedia('(hover: none) and (pointer: coarse)').matches);
 
     const player = videojs(videoEl, {
         ...(ivsTechReady ? { techOrder: ['AmazonIVS', 'html5'] } : {}),
@@ -79,8 +80,8 @@ function attachLiveVideoJs(videoEl) {
         fill: true,
         language: 'fr',
         liveui: true,
-        /* Mobile : délai plus long avant « user inactive » (barre qui semble absente). */
-        inactivityTimeout: coarseTouch ? 20000 : 4000,
+        /* Mobile : barre toujours « active » (évite opacity 0 sans survol). */
+        inactivityTimeout: mobileLike ? 0 : 4000,
         /**
          * Fenêtre seekable IVs souvent courte — seuil bas pour afficher la barre live UI.
          */
@@ -105,6 +106,12 @@ function attachLiveVideoJs(videoEl) {
     player.ready(() => {
         if (typeof player.enableIVSQualityPlugin === 'function') {
             player.enableIVSQualityPlugin();
+        }
+
+        if (mobileLike) {
+            player.userActive(true);
+            player.on('touchstart', () => player.userActive(true));
+            player.on('playing', () => player.userActive(true));
         }
 
         player.play()?.catch(() => {
