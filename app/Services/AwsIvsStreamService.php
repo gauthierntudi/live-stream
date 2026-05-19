@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Contracts\StreamingServiceInterface;
 use App\Models\Setting;
 use Aws\Exception\AwsException;
-use Aws\Ivs\IvsClient;
+use Aws\IVS\IVSClient;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -445,13 +445,13 @@ class AwsIvsStreamService implements StreamingServiceInterface
         return 'OFFLINE';
     }
 
-    protected function client(): IvsClient
+    protected function client(): IVSClient
     {
         if (! $this->isConfigured()) {
             throw new RuntimeException('AWS IVS n’est pas configuré (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_IVS_REGION).');
         }
 
-        return new IvsClient([
+        return new IVSClient([
             'version' => 'latest',
             'region' => $this->region(),
             'credentials' => [
@@ -501,7 +501,7 @@ class AwsIvsStreamService implements StreamingServiceInterface
         $clean = trim($clean, '-_');
 
         if ($clean === '') {
-            $clean = 'live-' . strtolower(bin2hex(random_bytes(4)));
+            $clean = 'live-'.strtolower(bin2hex(random_bytes(4)));
         }
 
         return substr($clean, 0, 128);
