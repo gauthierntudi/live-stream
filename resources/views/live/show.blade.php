@@ -9,19 +9,24 @@
 
 @push('styles')
 <style>
+    body:has(.live-page) {
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
     body:has(.live-page) main {
         padding-bottom: 0;
         position: relative;
         z-index: 1;
+        overflow: hidden;
     }
     .live-page {
         width: 100%;
         max-width: 100%;
         margin: 0;
         padding: 0;
-        min-height: 100vh;
-        min-height: 100dvh;
-        min-height: 100lvh;
+        /* Pas de min-height : évite nav + 100vh scrollable ; le lecteur est en fixed */
+        height: 0;
+        overflow: visible;
     }
     .live-page .player-wrap {
         position: fixed;
@@ -91,13 +96,8 @@
         z-index: 2;
         background: transparent;
     }
-    /* IVS (Video.js) : remplissage cinéma plein écran */
-    .live-page .player .live-player-netflix,
-    .live-page .player .live-player-netflix .video-js {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
+    /* IVS (Video.js) : calque plein écran — layout flex dans live-player-videojs.css */
+    .live-page .player .live-player-netflix {
         z-index: 3;
     }
     .live-page .player .live-player-netflix .video-js video {

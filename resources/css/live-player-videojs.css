@@ -26,10 +26,25 @@
     --vjs-brand-soft: rgba(229, 9, 20, 0.35);
     --vjs-text: #f3f4f6;
     --vjs-bar-bg: rgba(0, 0, 0, 0.88);
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .live-player-netflix .video-js {
     position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100%;
+    display: block;
+    overflow: hidden;
     font-family: var(--font-stream-body, 'Montserrat', system-ui, sans-serif);
     font-size: 14px;
     color: var(--vjs-text);
@@ -72,6 +87,19 @@
  * ou en user-inactive ; certains iPad ne matchent pas pointer: coarse seul).
  */
 @media (max-width: 896px), (hover: none) and (pointer: coarse) {
+    /*
+     * Ancrage au bas du viewport lecteur (player-wrap fixed).
+     * Évite la barre en bas du document quand Video.js dépasse en hauteur.
+     */
+    .live-page .player-wrap .live-player-netflix .video-js .vjs-control-bar {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 50;
+    }
+
     .live-player-netflix .video-js:not(.vjs-error):not(.vjs-controls-disabled) .vjs-control-bar {
         display: flex !important;
         visibility: visible !important;
